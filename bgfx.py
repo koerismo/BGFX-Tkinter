@@ -1,10 +1,12 @@
 '''
-	Better Graphics Wrapper
-	10/7/21
+Better Tkinter Graphics Wrapper
 
-	Provides a nice interface for interacting with tkinter's canvas features.
+Provides a nice interface for interacting with tkinter's canvas features.
 '''
 
+__version__ = '0.6.0'
+__author__ = 'Koerismo'
+__credits__ = 'Koerismo'
 
 import tkinter as tk
 from types import FunctionType
@@ -29,6 +31,7 @@ class Window():
 		self.root = tk.Tk()
 		self.root.title( title )
 		self.root.resizable( width=resizable, height=resizable )
+		self.__geometry = [ width, height ]
 		self.frame = tk.Frame( master, width=width, height=height )
 		self.canv = tk.Canvas( self.root, width=width, height=height, bg=bg, bd=-3 )
 		self.canv.pack( fill='both', expand=True )
@@ -82,9 +85,6 @@ class Window():
 	@property
 	def isOpen( self ) -> bool: return self.__open
 
-	@isOpen.setter
-	def isOpen( self, val ): raise AttributeError('Window.isOpen is read-only!')
-
 	def update( self ) -> None: self.root.update()
 
 	def keyIsDown( self, key ) -> bool: return key in self.__keysPressed and self.__keysPressed[key]
@@ -107,10 +107,30 @@ class Window():
 	@property
 	def height( self ) -> int: return self.canv.winfo_height()
 
+	@width.setter
+	def width( self, val ):
+		rval = round(val)
+		self.__geometry[0] = rval
+		self.root.geometry(f'{rval}x{self.__geometry[1]}')
+	@height.setter
+	def height( self, val ):
+		rval = round(val)
+		self.__geometry[1] = rval
+		self.root.geometry(f'{self.__geometry[0]}x{rval}')
+
+	@property
+	def bg( self ) -> str:
+		return self.__bg
+	
+	@bg.setter
+	def bg( self, val:str ):
+		self.__bg = val
+		self.canv.config( bg=val )
+
 	def __repr__( self ):
 		return f'Window(title="{self.root.title()}")'
 
-class GFXObject():
+class __GFXObject():
 	def __init__(
 		self,
 		window:Window,
@@ -184,7 +204,7 @@ class GFXObject():
 	def destroy( self ):
 		self.gfx.canv.delete( self.part )
 
-class GFXBBOXObject(GFXObject):
+class __GFXBBOXObject(__GFXObject):
 	def __init__(
 		self,
 		window:Window,
@@ -225,7 +245,7 @@ class GFXBBOXObject(GFXObject):
 			self._pos[3] + self._pos[1],
 		)
 
-class Rect(GFXBBOXObject):
+class Rect(__GFXBBOXObject):
 	def __init__(
 		self,
 		window:Window,
@@ -241,7 +261,7 @@ class Rect(GFXBBOXObject):
 	def __repr__( self ):
 		return f'Rect(x={self._pos[0]},y={self._pos[1]},width={self._pos[2]},height={self._pos[3]})'
 
-class Oval(GFXBBOXObject):
+class Oval(__GFXBBOXObject):
 	def __init__(
 		self,
 		window:Window,
@@ -337,7 +357,7 @@ class Line():
 	def __repr__( self ):
 		return f'Line(x1={self._pos[0]},y1={self._pos[1]},x2={self._pos[2]},y2={self._pos[3]})'
 
-class Text(GFXObject):
+class Text(__GFXObject):
 	def __init__(
 		self,
 		window: Window,
