@@ -4,15 +4,13 @@ Better Tkinter Graphics Wrapper
 Provides a nice interface for interacting with tkinter's canvas features.
 '''
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 __author__ = 'Koerismo'
 __credits__ = 'Koerismo'
 
 import tkinter as tk
 from types import FunctionType
 from typing import Union
-
-tk.Tk().withdraw()
 
 class Window():
 	def __init__(
@@ -398,6 +396,16 @@ class Text(__GFXObject):
 			font=(fontFamily, fontSize, fontVariant),
 			anchor=anchor
 		)
+
+	@property
+	def width( self ):
+		bbox = self.gfx.canv.bbox( self.part )
+		return bbox[2] - bbox[0]
+
+	@property
+	def height( self ):
+		bbox = self.gfx.canv.bbox( self.part )
+		return bbox[3] - bbox[1]
 
 	@property
 	def content( self ):

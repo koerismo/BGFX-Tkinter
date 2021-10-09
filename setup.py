@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
 	name='bgfx',
-	version='0.6.0',
+	version='0.7.0',
 	description='A clean wrapper for tkinter canvas applications.',
 	url='https://github.com/koerismo/BGFX-Tkinter/tree/pip',
 	author='Koerismo',
