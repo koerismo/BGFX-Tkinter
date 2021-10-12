@@ -4,7 +4,7 @@ Better Tkinter Graphics Wrapper
 Provides a nice interface for interacting with tkinter's canvas features.
 '''
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 __author__ = 'Koerismo'
 __credits__ = 'Koerismo'
 
@@ -12,15 +12,13 @@ import tkinter as tk
 from types import FunctionType
 from typing import Union
 
-tk.Tk().withdraw()
-
 class Window():
 	def __init__(
 				self,
 				title:str="Window",
 				width:int=256,
 				height:int=256,
-				master:tk.Frame=None,
+				master:tk.Tk|tk.Frame=None,
 				bg:str='white',
 				resizable:bool=False,
 				cursor:bool=True
@@ -28,13 +26,17 @@ class Window():
 		'''
 			Creates a new BGFX Window object.
 		'''
-		self.root = tk.Tk()
-		self.root.title( title )
-		self.root.resizable( width=resizable, height=resizable )
-		self.__geometry = [ width, height ]
-		self.frame = tk.Frame( master, width=width, height=height )
+		if master == None:
+			self.root = tk.Tk()
+			self.root.title( title )
+			self.root.resizable( width=resizable, height=resizable )
+			self.__geometry = [ width, height ]
+		else:
+			self.root = master
+		self.frame = tk.Frame( self.root, width=width, height=height )
 		self.canv = tk.Canvas( self.root, width=width, height=height, bg=bg, bd=-3 )
-		self.canv.pack( fill='both', expand=True )
+		if master == None:
+			self.canv.pack( fill='both', expand=True )
 
 		if not cursor: self.canv.config(cursor='none')
 
@@ -213,7 +215,7 @@ class __GFXBBOXObject(__GFXObject):
 		fill:str = 'white',
 		outline:str = 'black',
 		outlineWidth:int = 1
-	):
+	) -> None:
 		super().__init__( window, x, y, fill=fill, outline=outline, outlineWidth=outlineWidth )
 		self._pos = [x,y,w,h]
 
@@ -400,6 +402,16 @@ class Text(__GFXObject):
 		)
 
 	@property
+	def width( self ):
+		bbox = self.gfx.canv.bbox( self.part )
+		return bbox[2] - bbox[0]
+
+	@property
+	def height( self ):
+		bbox = self.gfx.canv.bbox( self.part )
+		return bbox[3] - bbox[1]
+
+	@property
 	def content( self ):
 		return self.gfx.canv.itemcget( self.part, 'text' )
 
@@ -410,6 +422,23 @@ class Text(__GFXObject):
 	def __repr__( self ):
 		return f'Text(x={self._pos[0]},y={self._pos[1]})'
 
+class Poly(__GFXObject):
+	def __init__(
+		self,
+		window: Window,
+		points: list[int],
+		fill: str = 'white',
+		outline: str = 'black',
+		outlineWidth: int = 1,
+	) -> None:
+		''' Represents a polygon created from an array of [ x0, y0, x1, y1, ... x100, y100, ... ] and so on. Unfortunately, verts cannot be modified at runtime. '''
+		super().__init__( window, 0, 0, fill=fill, outline=outline, outlineWidth=outlineWidth )
+		self.part = window.canv.create_polygon( *points, fill=fill, outline=outline )
+		self._pos = window.canv.bbox( self.part )[:2]
+
+	def __repr__( self ):
+		return 'Poly()'
+
 class Image():
 	def __init__(
 		self,
@@ -417,7 +446,8 @@ class Image():
 		x:int, y:int,
 		file:str|tk.PhotoImage,
 		anchor:str = 'nw'
-	):
+	) -> None:
+		''' Represents an image retreived from a filepath. '''
 		self.gfx = window
 		self.photo = tk.PhotoImage( file=file, master=window.root )
 		self.part = window.canv.create_image( x, y, image=self.photo, anchor=anchor )
