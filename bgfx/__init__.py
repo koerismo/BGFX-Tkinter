@@ -18,7 +18,7 @@ class Window():
 				title:str="Window",
 				width:int=256,
 				height:int=256,
-				master:tk.Frame=None,
+				master:tk.Tk|tk.Frame=None,
 				bg:str='white',
 				resizable:bool=False,
 				cursor:bool=True
@@ -26,13 +26,17 @@ class Window():
 		'''
 			Creates a new BGFX Window object.
 		'''
-		self.root = tk.Tk()
-		self.root.title( title )
-		self.root.resizable( width=resizable, height=resizable )
-		self.__geometry = [ width, height ]
-		self.frame = tk.Frame( master, width=width, height=height )
+		if master == None:
+			self.root = tk.Tk()
+			self.root.title( title )
+			self.root.resizable( width=resizable, height=resizable )
+			self.__geometry = [ width, height ]
+		else:
+			self.root = master
+		self.frame = tk.Frame( self.root, width=width, height=height )
 		self.canv = tk.Canvas( self.root, width=width, height=height, bg=bg, bd=-3 )
-		self.canv.pack( fill='both', expand=True )
+		if master == None:
+			self.canv.pack( fill='both', expand=True )
 
 		if not cursor: self.canv.config(cursor='none')
 
