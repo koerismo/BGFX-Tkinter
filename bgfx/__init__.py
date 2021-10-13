@@ -61,14 +61,16 @@ class Window():
 			self.mouseX = event.x
 			self.mouseY = event.y
 			self.mousePressed = True
-			self.onMousePressed( event.x, event.y )
+			self.onMousePressed( event.x, event.y, event.num )
 		self.root.bind( '<ButtonPress-1>', onMousePressedInternal )
+		self.root.bind( '<ButtonPress-2>', onMousePressedInternal )
 		def onMouseReleasedInternal( event ):
 			self.mouseX = event.x
 			self.mouseY = event.y
 			self.mousePressed = False
-			self.onMouseReleased( event.x, event.y )
+			self.onMouseReleased( event.x, event.y, event.num )
 		self.root.bind( '<ButtonRelease-1>', onMouseReleasedInternal )
+		self.root.bind( '<ButtonRelease-2>', onMouseReleasedInternal )
 		def onKeyPressedInternal( event ):
 			self.__keysPressed[event.keysym] = True
 			self.onKeyPressed( event.keysym )
@@ -79,17 +81,26 @@ class Window():
 		self.root.bind( '<KeyRelease>', onKeyReleasedInternal )
 
 	def onMouseMove( self, x, y ): pass
-	def onMousePressed( self, x, y ): pass
-	def onMouseReleased( self, x, y ): pass
+	def onMousePressed( self, x, y, button ): pass
+	def onMouseReleased( self, x, y, button ): pass
 	def onKeyPressed( self, k ): pass
 	def onKeyReleased( self, k ): pass
 
 	@property
-	def isOpen( self ) -> bool: return self.__open
+	def isOpen( self ) -> bool:
+		return self.__open
 
-	def update( self ) -> None: self.root.update()
+	def close( self ) -> None:
+		''' Closes the parent window. '''
+		self.root.destroy()
 
-	def keyIsDown( self, key ) -> bool: return key in self.__keysPressed and self.__keysPressed[key]
+	def update( self ) -> None:
+		''' Updates the window. This is necessary for the window to remain interactive to the user. '''
+		self.root.update()
+
+	def keyIsDown( self, key ) -> bool:
+		''' Returns whether the given key is being pressed down. '''
+		return key in self.__keysPressed and self.__keysPressed[key]
 
 	def mouseOver( self, object: Union['Rect','Oval','Line','Text'] ) -> bool:
 		''' Performs a quick-and-dirty bounding box collision check with the mouse. Useful for buttons. '''
