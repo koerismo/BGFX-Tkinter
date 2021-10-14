@@ -173,7 +173,8 @@ class __GFXObject():
 		x:int, y:int,
 		fill:str = 'white',
 		outline:str = 'black',
-		outlineWidth:int = 1
+		outlineWidth:int = 1,
+		outlineDash:tuple|None = None
 	):
 		self.gfx = window
 		self._fill = fill
@@ -181,6 +182,7 @@ class __GFXObject():
 		self._outlineWidth = outlineWidth
 		self._hidden = False
 		self._pos = [ x, y ]
+		self.__outlineDash = outlineDash
 
 	@property
 	def x( self ) -> int: return self._pos[0]
@@ -211,23 +213,32 @@ class __GFXObject():
 	@property
 	def outlineWidth( self ) -> int: return self._outlineWidth
 
+	@property
+	def outlineDash( self ) -> tuple: return self.__outlineDash
+
 	@fill.setter
-	def fill( self, val ):
+	def fill( self, val:str ):
 		if val == self._fill: return
 		self._fill = val
 		self.gfx.canv.itemconfig( self.part, fill=val )
 
 	@outline.setter
-	def outline( self, val ):
+	def outline( self, val:str ):
 		if val == self._outline: return
 		self._outline = val
 		self.gfx.canv.itemconfig( self.part, outline=val )
 
 	@outlineWidth.setter
-	def outlineWidth( self, val ):
+	def outlineWidth( self, val:int ):
 		if val == self._outlineWidth: return
 		self._outlineWidth = val
 		self.gfx.canv.itemconfig( self.part, width=val )
+
+	@outlineDash.setter
+	def outlineDash( self, val:tuple ):
+		if val == self.outlineDash: return
+		self.__outlineDash = val
+		self.gfx.canv.itemconfig( self.part, dash=val )
 
 	def hide( self ):
 		self._hidden = True
@@ -248,9 +259,10 @@ class __GFXBBOXObject(__GFXObject):
 		w:int, h:int,
 		fill:str = 'white',
 		outline:str = 'black',
-		outlineWidth:int = 1
+		outlineWidth:int = 1,
+		outlineDash:tuple|None = None
 	) -> None:
-		super().__init__( window, x, y, fill=fill, outline=outline, outlineWidth=outlineWidth )
+		super().__init__( window, x, y, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
 		self._pos = [x,y,w,h]
 
 	@property
@@ -289,10 +301,11 @@ class Rect(__GFXBBOXObject):
 		w:int, h:int,
 		fill:str='white',
 		outline:str='black',
-		outlineWidth:int=1
+		outlineWidth:int=1,
+		outlineDash:tuple|None = None
 	) -> None:
-		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth )
-		self.part = window.canv.create_rectangle( x, y, x+w, y+h, fill=fill, outline=outline )
+		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
+		self.part = window.canv.create_rectangle( x, y, x+w, y+h, fill=fill, outline=outline, dash=outlineDash )
 
 	def __repr__( self ):
 		return f'Rect(x={self._pos[0]},y={self._pos[1]},width={self._pos[2]},height={self._pos[3]})'
@@ -305,10 +318,11 @@ class Oval(__GFXBBOXObject):
 		w:int, h:int,
 		fill:str='white',
 		outline:str='black',
-		outlineWidth:int=1
+		outlineWidth:int=1,
+		outlineDash:tuple|None = None
 	) -> None:
-		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth )
-		self.part = window.canv.create_oval( x, y, x+w, y+h, fill=fill, outline=outline )
+		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
+		self.part = window.canv.create_oval( x, y, x+w, y+h, fill=fill, outline=outline, dash=outlineDash )
 
 	def __repr__( self ):
 		return f'Oval(x={self._pos[0]},y={self._pos[1]},width={self._pos[2]},height={self._pos[3]})'
@@ -320,14 +334,16 @@ class Line():
 		x1:int, y1:int,
 		x2:int, y2:int,
 		width:int=1,
-		fill:str='black'
+		fill:str='black',
+		dash:tuple|None = None
 	) -> None:
 		self.gfx = gfxWindow
 		self._pos = [ x1, y1, x2, y2 ]
 		self._fill = fill
 		self._width = width
 		self._hidden = False
-		self.part = gfxWindow.canv.create_line( x1, y1, x2, y2, width=width, fill=fill )
+		self.__dash = dash
+		self.part = gfxWindow.canv.create_line( x1, y1, x2, y2, width=width, fill=fill, dash=dash )
 
 	@property
 	def x1( self ) -> int: return self._pos[0]
@@ -378,6 +394,15 @@ class Line():
 	def width( self, val:int ):
 		self._width = val
 		self.gfx.canv.itemconfig( self.part, width=val )
+
+	@property
+	def dash( self ):
+		return self.__dash
+
+	@dash.setter
+	def dash( self, val:tuple ):
+		self.__dash = val
+		self.gfx.canv.itemconfig( self.part, dash=val )
 
 	def hide( self ):
 		self._hidden = True
@@ -464,10 +489,11 @@ class Poly(__GFXObject):
 		fill: str = 'white',
 		outline: str = 'black',
 		outlineWidth: int = 1,
+		outlineDash:tuple|None = None
 	) -> None:
 		''' Represents a polygon created from an array of [ x0, y0, x1, y1, ... x100, y100, ... ] and so on. Unfortunately, verts cannot be modified at runtime. '''
-		super().__init__( window, 0, 0, fill=fill, outline=outline, outlineWidth=outlineWidth )
-		self.part = window.canv.create_polygon( *points, fill=fill, outline=outline )
+		super().__init__( window, 0, 0, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
+		self.part = window.canv.create_polygon( *points, fill=fill, outline=outline, dash=outlineDash )
 		self._pos = window.canv.bbox( self.part )[:2]
 
 	def __repr__( self ):
