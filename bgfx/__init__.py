@@ -21,7 +21,13 @@ class Window():
 				master:tk.Tk|tk.Frame=None,
 				bg:str='white',
 				resizable:bool=False,
-				cursor:bool=True
+				cursor:bool=True,
+				
+				onMouseMove:FunctionType=None,
+				onMousePressed:FunctionType=None,
+				onMouseReleased:FunctionType=None,
+				onKeyPressed:FunctionType=None,
+				onKeyReleased:FunctionType=None
 				) -> None:
 		'''
 			Creates a new BGFX Window object.
@@ -51,6 +57,12 @@ class Window():
 		self.__keysPressed = {}
 
 		self.__setupListeners()
+
+		if onMouseMove:			self.onMouseMove	 = onMouseMove
+		if onMousePressed:		self.onMousePressed	 = onMousePressed
+		if onMouseReleased:		self.onMouseReleased = onMouseReleased
+		if onKeyPressed:		self.onKeyPressed	 = onKeyPressed
+		if onKeyReleased:		self.onKeyReleased	 = onKeyReleased
 
 	def __setupListeners( self ):
 		def onMouseMoveInternal( event ):
