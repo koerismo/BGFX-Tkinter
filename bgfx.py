@@ -20,8 +20,14 @@ class Window():
 				height:int=256,
 				master:tk.Tk|tk.Frame=None,
 				bg:str='white',
-				resizable:bool=False,
-				cursor:bool=True
+				resizable:bool|tuple[bool,bool]=False,
+				cursor:bool=True,
+				
+				onMouseMove:FunctionType=None,
+				onMousePressed:FunctionType=None,
+				onMouseReleased:FunctionType=None,
+				onKeyPressed:FunctionType=None,
+				onKeyReleased:FunctionType=None
 				) -> None:
 		'''
 			Creates a new BGFX Window object.
@@ -29,7 +35,11 @@ class Window():
 		if master == None:
 			self.root = tk.Tk()
 			self.root.title( title )
-			self.root.resizable( width=resizable, height=resizable )
+
+			if type(resizable) == tuple and len(resizable) == 2: self.root.resizable( width=resizable[0], height=resizable[1] )
+			elif type(resizable) == bool:						 self.root.resizable( width=resizable, height=resizable )
+			else:												 raise ValueError( 'resizable must be either bool or a (width, height) bool tuple. ')
+
 			self.__geometry = [ width, height ]
 		else:
 			self.root = master
@@ -46,10 +56,17 @@ class Window():
 
 		self.mouseX = 0
 		self.mouseY = 0
-		self.mousePressed = False
+		self.mousePressedL = False
+		self.mousePressedR = False
 		self.__keysPressed = {}
 
 		self.__setupListeners()
+
+		if onMouseMove:			self.onMouseMove	 = onMouseMove
+		if onMousePressed:		self.onMousePressed	 = onMousePressed
+		if onMouseReleased:		self.onMouseReleased = onMouseReleased
+		if onKeyPressed:		self.onKeyPressed	 = onKeyPressed
+		if onKeyReleased:		self.onKeyReleased	 = onKeyReleased
 
 	def __setupListeners( self ):
 		def onMouseMoveInternal( event ):
@@ -60,15 +77,23 @@ class Window():
 		def onMousePressedInternal( event ):
 			self.mouseX = event.x
 			self.mouseY = event.y
-			self.mousePressed = True
-			self.onMousePressed( event.x, event.y )
+			if event.num == 1:
+				self.mousePressedL = True
+			elif event.num == 2:
+				self.mousePressedR = True
+			self.onMousePressed( event.x, event.y, event.num )
 		self.root.bind( '<ButtonPress-1>', onMousePressedInternal )
+		self.root.bind( '<ButtonPress-2>', onMousePressedInternal )
 		def onMouseReleasedInternal( event ):
 			self.mouseX = event.x
 			self.mouseY = event.y
-			self.mousePressed = False
-			self.onMouseReleased( event.x, event.y )
+			if event.num == 1:
+				self.mousePressedL = False
+			elif event.num == 2:
+				self.mousePressedR = False
+			self.onMouseReleased( event.x, event.y, event.num )
 		self.root.bind( '<ButtonRelease-1>', onMouseReleasedInternal )
+		self.root.bind( '<ButtonRelease-2>', onMouseReleasedInternal )
 		def onKeyPressedInternal( event ):
 			self.__keysPressed[event.keysym] = True
 			self.onKeyPressed( event.keysym )
@@ -79,17 +104,26 @@ class Window():
 		self.root.bind( '<KeyRelease>', onKeyReleasedInternal )
 
 	def onMouseMove( self, x, y ): pass
-	def onMousePressed( self, x, y ): pass
-	def onMouseReleased( self, x, y ): pass
+	def onMousePressed( self, x, y, button ): pass
+	def onMouseReleased( self, x, y, button ): pass
 	def onKeyPressed( self, k ): pass
 	def onKeyReleased( self, k ): pass
 
 	@property
-	def isOpen( self ) -> bool: return self.__open
+	def isOpen( self ) -> bool:
+		return self.__open
 
-	def update( self ) -> None: self.root.update()
+	def close( self ) -> None:
+		''' Closes the parent window. '''
+		self.root.destroy()
 
-	def keyIsDown( self, key ) -> bool: return key in self.__keysPressed and self.__keysPressed[key]
+	def update( self ) -> None:
+		''' Updates the window. This is necessary for the window to remain interactive to the user. '''
+		self.root.update()
+
+	def keyIsDown( self, key ) -> bool:
+		''' Returns whether the given key is being pressed down. '''
+		return key in self.__keysPressed and self.__keysPressed[key]
 
 	def mouseOver( self, object: Union['Rect','Oval','Line','Text'] ) -> bool:
 		''' Performs a quick-and-dirty bounding box collision check with the mouse. Useful for buttons. '''

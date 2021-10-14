@@ -11,11 +11,8 @@ def onMove( mouseX, mouseY ):
 	myCursor.x = mouseX - 5
 	myCursor.y = mouseY - 5
 
-def onPress( mouseX, mouseY ):
-	myCursor.fill = 'white'
-
-def onRelease( mouseX, mouseY ):
-	myCursor.fill = ''
+def onPress( mouseX, mouseY, mouseButton ):	myCursor.fill = 'white'
+def onRelease( mouseX, mouseY, mouseButton ):	myCursor.fill = ''
 
 # Register the events with the window
 myWin.onMouseMove = onMove
