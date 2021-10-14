@@ -46,7 +46,8 @@ class Window():
 
 		self.mouseX = 0
 		self.mouseY = 0
-		self.mousePressed = False
+		self.mousePressedL = False
+		self.mousePressedR = False
 		self.__keysPressed = {}
 
 		self.__setupListeners()
@@ -60,14 +61,20 @@ class Window():
 		def onMousePressedInternal( event ):
 			self.mouseX = event.x
 			self.mouseY = event.y
-			self.mousePressed = True
+			if event.num == 1:
+				self.mousePressedL = True
+			elif event.num == 2:
+				self.mousePressedR = True
 			self.onMousePressed( event.x, event.y, event.num )
 		self.root.bind( '<ButtonPress-1>', onMousePressedInternal )
 		self.root.bind( '<ButtonPress-2>', onMousePressedInternal )
 		def onMouseReleasedInternal( event ):
 			self.mouseX = event.x
 			self.mouseY = event.y
-			self.mousePressed = False
+			if event.num == 1:
+				self.mousePressedL = False
+			elif event.num == 2:
+				self.mousePressedR = False
 			self.onMouseReleased( event.x, event.y, event.num )
 		self.root.bind( '<ButtonRelease-1>', onMouseReleasedInternal )
 		self.root.bind( '<ButtonRelease-2>', onMouseReleasedInternal )
