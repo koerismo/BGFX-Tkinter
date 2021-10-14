@@ -75,6 +75,7 @@ class Window():
 			self.onMouseMove( event.x, event.y )
 		self.root.bind( '<Motion>', onMouseMoveInternal )
 		def onMousePressedInternal( event ):
+			if event.x < 0 or event.x > self.width or event.y < 0 or event.y > self.height: return # Prevent OOB click
 			self.mouseX = event.x
 			self.mouseY = event.y
 			if event.num == 1:
@@ -88,8 +89,10 @@ class Window():
 			self.mouseX = event.x
 			self.mouseY = event.y
 			if event.num == 1:
+				if self.mousePressedL == False: return
 				self.mousePressedL = False
 			elif event.num == 2:
+				if self.mousePressedR == False: return
 				self.mousePressedR = False
 			self.onMouseReleased( event.x, event.y, event.num )
 		self.root.bind( '<ButtonRelease-1>', onMouseReleasedInternal )
@@ -555,7 +558,7 @@ if __name__ == '__main__':
 		myTitle		= Text( myWin, 175, 100, 'Hello, world!', fill='#999', fontSize=30 )
 		mySubtitle	= Text( myWin, 175, 120, 'Import this file to use it as a module.', fill='#555', fontSize=10 )
 
-		def doClick( mouseX, mouseY ):
+		def doClick( mouseX, mouseY, mouseButton ):
 			myTitle.content = choice(['Hello, world!', 'Another title!', 'How??', 'What??', 'Amazing!'])
 		myWin.onMousePressed = doClick
 
