@@ -4,7 +4,7 @@ Better Tkinter Graphics Wrapper
 Provides a nice interface for interacting with tkinter's canvas features.
 '''
 
-__version__ = '0.7.0'
+__version__ = '0.7.5'
 __author__ = 'Koerismo'
 __credits__ = 'Koerismo'
 
