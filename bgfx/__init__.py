@@ -20,7 +20,7 @@ class Window():
 				height:int=256,
 				master:tk.Tk|tk.Frame=None,
 				bg:str='white',
-				resizable:bool=False,
+				resizable:bool|tuple[bool,bool]=False,
 				cursor:bool=True,
 				
 				onMouseMove:FunctionType=None,
@@ -35,7 +35,11 @@ class Window():
 		if master == None:
 			self.root = tk.Tk()
 			self.root.title( title )
-			self.root.resizable( width=resizable, height=resizable )
+
+			if type(resizable) == tuple and len(resizable) == 2: self.root.resizable( width=resizable[0], height=resizable[1] )
+			elif type(resizable) == bool:						 self.root.resizable( width=resizable, height=resizable )
+			else:												 raise ValueError( 'resizable must be either bool or a (width, height) bool tuple. ')
+
 			self.__geometry = [ width, height ]
 		else:
 			self.root = master
