@@ -177,7 +177,7 @@ class __GFXObject():
 		fill:str = 'white',
 		outline:str = 'black',
 		outlineWidth:int = 1,
-		outlineDash:tuple|None = None
+		outlineDash:tuple = ()
 	):
 		self.gfx = window
 		self._fill = fill
@@ -194,18 +194,20 @@ class __GFXObject():
 	def y( self ) -> int: return self._pos[1]
 
 	@x.setter
-	def x( self, val:int ):
+	def x( self, val:int ) -> bool:
 		rval = round( val )
-		if self._pos[0] == rval: return
+		if self._pos[0] == rval: return False
 		self._pos[0] = rval
 		self.gfx.canv.moveto( self.part, self._pos[0], self._pos[1] )
+		return True
 
 	@y.setter
-	def y( self, val:int ):
+	def y( self, val:int ) -> bool:
 		rval = round( val )
-		if self._pos[1] == rval: return
+		if self._pos[1] == rval: return False
 		self._pos[1] = rval
 		self.gfx.canv.moveto( self.part, self._pos[0], self._pos[1] )
+		return True
 
 	@property
 	def fill( self ) -> str: return self._fill
@@ -220,38 +222,42 @@ class __GFXObject():
 	def outlineDash( self ) -> tuple: return self.__outlineDash
 
 	@fill.setter
-	def fill( self, val:str ):
-		if val == self._fill: return
+	def fill( self, val:str ) -> bool:
+		if val == self._fill: return False
 		self._fill = val
 		self.gfx.canv.itemconfig( self.part, fill=val )
+		return True
 
 	@outline.setter
-	def outline( self, val:str ):
-		if val == self._outline: return
+	def outline( self, val:str ) -> bool:
+		if val == self._outline: return False
 		self._outline = val
 		self.gfx.canv.itemconfig( self.part, outline=val )
+		return True
 
 	@outlineWidth.setter
-	def outlineWidth( self, val:int ):
-		if val == self._outlineWidth: return
+	def outlineWidth( self, val:int ) -> bool:
+		if val == self._outlineWidth: return False
 		self._outlineWidth = val
 		self.gfx.canv.itemconfig( self.part, width=val )
+		return True
 
 	@outlineDash.setter
-	def outlineDash( self, val:tuple ):
-		if val == self.outlineDash: return
+	def outlineDash( self, val:tuple ) -> bool:
+		if val == self.outlineDash: return False
 		self.__outlineDash = val
 		self.gfx.canv.itemconfig( self.part, dash=val )
+		return True
 
-	def hide( self ):
+	def hide( self ) -> None:
 		self._hidden = True
 		self.gfx.canv.itemconfig( self.part, state='hidden' )
 
-	def show( self ):
+	def show( self ) -> None:
 		self._hidden = False
 		self.gfx.canv.itemconfig( self.part, state='normal' )
 
-	def destroy( self ):
+	def destroy( self ) -> None:
 		self.gfx.canv.delete( self.part )
 
 class __GFXBBOXObject(__GFXObject):
@@ -263,7 +269,7 @@ class __GFXBBOXObject(__GFXObject):
 		fill:str = 'white',
 		outline:str = 'black',
 		outlineWidth:int = 1,
-		outlineDash:tuple|None = None
+		outlineDash:tuple = ()
 	) -> None:
 		super().__init__( window, x, y, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
 		self._pos = [x,y,w,h]
@@ -305,7 +311,7 @@ class Rect(__GFXBBOXObject):
 		fill:str='white',
 		outline:str='black',
 		outlineWidth:int=1,
-		outlineDash:tuple|None = None
+		outlineDash:tuple = ()
 	) -> None:
 		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
 		self.part = window.canv.create_rectangle( x, y, x+w, y+h, fill=fill, outline=outline, dash=outlineDash )
@@ -322,7 +328,7 @@ class Oval(__GFXBBOXObject):
 		fill:str='white',
 		outline:str='black',
 		outlineWidth:int=1,
-		outlineDash:tuple|None = None
+		outlineDash:tuple = ()
 	) -> None:
 		super().__init__( window, x, y, w, h, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
 		self.part = window.canv.create_oval( x, y, x+w, y+h, fill=fill, outline=outline, dash=outlineDash )
@@ -338,7 +344,7 @@ class Line():
 		x2:int, y2:int,
 		width:int=1,
 		fill:str='black',
-		dash:tuple|None = None
+		dash:tuple = ()
 	) -> None:
 		self.gfx = gfxWindow
 		self._pos = [ x1, y1, x2, y2 ]
@@ -361,64 +367,77 @@ class Line():
 	def y2( self ) -> int: return self._pos[3]
 
 	@x1.setter
-	def x1( self, val:int ) -> None:
+	def x1( self, val:int ) -> bool:
+		if self._pos[0] == val: return False
 		self._pos[0] = val
 		self.gfx.canv.coords( self.part, val, self._pos[1], self._pos[2], self._pos[3] )
+		return True
 
 	@y1.setter
-	def y1( self, val:int ) -> None:
+	def y1( self, val:int ) -> bool:
+		if self._pos[1] == val: return False
 		self._pos[1] = val
 		self.gfx.canv.coords( self.part, self._pos[0], val, self._pos[2], self._pos[3] )
+		return True
 
 	@x2.setter
-	def x2( self, val:int ) -> None:
+	def x2( self, val:int ) -> bool:
+		if self._pos[2] == val: return False
 		self._pos[2] = val
 		self.gfx.canv.coords( self.part, self._pos[0], self._pos[1], val, self._pos[3] )
+		return True
 
 	@y2.setter
-	def y2( self, val:int ) -> None:
+	def y2( self, val:int ) -> bool:
+		if self._pos[3] == val: return False
 		self._pos[3] = val
 		self.gfx.canv.coords( self.part, self._pos[0], self._pos[1], self._pos[2], val )
+		return True
 
 	@property
 	def fill( self ) -> str: return self._fill
 
 	@fill.setter
-	def fill( self, val ):
-		if val == self._fill: return
+	def fill( self, val ) -> bool:
+		if val == self._fill: return False
 		self._fill = val
 		self.gfx.canv.itemconfig( self.part, fill=val )
+		return True
 
 	@property
 	def width( self ) -> int:
 		return self._width
 
 	@width.setter
-	def width( self, val:int ):
+	def width( self, val:int ) -> bool:
+		if val == self._width: return False
 		self._width = val
 		self.gfx.canv.itemconfig( self.part, width=val )
+		return True
 
 	@property
-	def dash( self ):
+	def dash( self ) -> tuple:
 		return self.__dash
 
 	@dash.setter
-	def dash( self, val:tuple ):
+	def dash( self, val:tuple ) -> bool:
+		if val == self.__dash: return False
 		self.__dash = val
 		self.gfx.canv.itemconfig( self.part, dash=val )
+		return True
 
-	def hide( self ):
+	def hide( self ) -> None:
 		self._hidden = True
 		self.gfx.canv.itemconfig( self.part, state='hidden' )
 
-	def show( self ):
+	def show( self ) -> None:
 		self._hidden = False
 		self.gfx.canv.itemconfig( self.part, state='normal' )
 
-	def destroy( self ):
+	def destroy( self ) -> None:
 		self.gfx.canv.delete( self.part )
 
-	def __repr__( self ):
+	def __repr__( self ) -> str:
 		return f'Line(x1={self._pos[0]},y1={self._pos[1]},x2={self._pos[2]},y2={self._pos[3]})'
 
 class Text(__GFXObject):
@@ -464,24 +483,24 @@ class Text(__GFXObject):
 		)
 
 	@property
-	def width( self ):
+	def width( self ) -> int:
 		bbox = self.gfx.canv.bbox( self.part )
 		return bbox[2] - bbox[0]
 
 	@property
-	def height( self ):
+	def height( self ) -> int:
 		bbox = self.gfx.canv.bbox( self.part )
 		return bbox[3] - bbox[1]
 
 	@property
-	def content( self ):
+	def content( self ) -> str:
 		return self.gfx.canv.itemcget( self.part, 'text' )
 
 	@content.setter
-	def content( self, val:str ):
+	def content( self, val:str ) -> None:
 		self.gfx.canv.itemconfig( self.part, text=val )
 
-	def __repr__( self ):
+	def __repr__( self ) -> str:
 		return f'Text(x={self._pos[0]},y={self._pos[1]})'
 
 class Poly(__GFXObject):
