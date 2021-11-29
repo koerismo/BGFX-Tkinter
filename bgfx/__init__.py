@@ -511,11 +511,13 @@ class Poly(__GFXObject):
 		fill: str = 'white',
 		outline: str = 'black',
 		outlineWidth: int = 1,
-		outlineDash:tuple|None = None
+		outlineDash:tuple|None = None,
+		smooth:bool = False,
+		smoothsteps:float = 12
 	) -> None:
 		''' Represents a polygon created from an array of [ x0, y0, x1, y1, ... x100, y100, ... ] and so on. Unfortunately, verts cannot be modified at runtime. '''
 		super().__init__( window, 0, 0, fill=fill, outline=outline, outlineWidth=outlineWidth, outlineDash=outlineDash )
-		self.part = window.canv.create_polygon( *points, fill=fill, outline=outline, dash=outlineDash )
+		self.part = window.canv.create_polygon( *points, fill=fill, outline=outline, width=outlineWidth, dash=outlineDash, smooth=smooth, splinesteps=smoothsteps )
 		self._pos = window.canv.bbox( self.part )[:2]
 
 	def __repr__( self ):
