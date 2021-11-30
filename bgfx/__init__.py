@@ -4,7 +4,7 @@ Better Tkinter Graphics Wrapper
 Provides a nice interface for interacting with tkinter's canvas features.
 '''
 
-__version__ = '0.7.5'
+__version__ = '0.7.6'
 __author__ = 'Koerismo'
 __credits__ = 'Koerismo'
 
@@ -533,7 +533,10 @@ class Image():
 	) -> None:
 		''' Represents an image retreived from a filepath. '''
 		self.gfx = window
-		self.photo = tk.PhotoImage( file=file, master=window.root )
+		if type(file) == str:
+			self.photo = tk.PhotoImage( file=file, master=window.root )
+		else:
+			self.photo = file
 		self.part = window.canv.create_image( x, y, image=self.photo, anchor=anchor )
 		self._pos = [ x, y, self.photo.width(), self.photo.height() ]
 
