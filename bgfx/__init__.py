@@ -118,6 +118,7 @@ class Window():
 
 	def close( self ) -> None:
 		''' Closes the parent window. '''
+		self.__open = False
 		self.root.destroy()
 
 	def update( self ) -> None:
